@@ -1,10 +1,9 @@
 """
-Smart Grid Load Predictor - Enhanced Version
+Smart Grid Load Predictor - Auto-Reactive Version
 =============================================
-Advanced XGBoost-powered Streamlit app with stunning visuals,
-smooth animations, and optimized user experience.
-Features: Glassmorphism, animated gradients, particle effects,
-and real-time performance metrics.
+Advanced XGBoost-powered Streamlit app with stunning visuals.
+Features: Reactive UI (no predict button needed), Glassmorphism, 
+animated metrics, and exact feature alignment.
 """
 
 import streamlit as st
@@ -38,7 +37,6 @@ st.markdown(f"""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;600;700;800&display=swap');
     
-    /* ── Root Theme Variables ── */
     :root {{
         --bg-dark: {DARK_BG};
         --card-bg: {CARD_BG};
@@ -50,32 +48,22 @@ st.markdown(f"""
         --border: {BORDER_COLOR};
     }}
     
-    /* ── Global Styles ── */
-    * {{
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }}
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
     
-    html, body, [data-testid="stAppViewContainer"],
-    [data-testid="stApp"] {{
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {{
         background: linear-gradient(135deg, {DARK_BG} 0%, #1a2a3a 100%) !important;
         color: {TEXT_PRIMARY} !important;
         font-family: 'Poppins', sans-serif !important;
     }}
     
-    /* ── Sidebar Styling ── */
     [data-testid="stSidebar"] {{
         background: linear-gradient(180deg, rgba(15, 20, 25, 0.95) 0%, rgba(20, 30, 50, 0.9) 100%) !important;
         border-right: 1px solid var(--border) !important;
         backdrop-filter: blur(20px) !important;
     }}
     
-    [data-testid="stSidebar"] * {{
-        color: var(--text-primary) !important;
-    }}
+    [data-testid="stSidebar"] * {{ color: var(--text-primary) !important; }}
     
-    /* ── Smooth Glass Card Effect ── */
     .glass-card {{
         background: var(--card-bg);
         backdrop-filter: blur(20px);
@@ -93,7 +81,6 @@ st.markdown(f"""
         border-color: rgba(0, 217, 255, 0.2);
     }}
     
-    /* ── Animated Metric Cards ── */
     .metric-card {{
         background: linear-gradient(135deg, rgba(0, 217, 255, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%);
         border: 1px solid var(--border);
@@ -121,19 +108,10 @@ st.markdown(f"""
         animation: spin 4s linear infinite;
     }}
     
-    .metric-card:hover .metric-icon {{
-        animation: bounce 0.6s ease-in-out;
-    }}
+    .metric-card:hover .metric-icon {{ animation: bounce 0.6s ease-in-out; }}
     
-    @keyframes spin {{
-        0% {{ transform: rotate(0deg); }}
-        100% {{ transform: rotate(360deg); }}
-    }}
-    
-    @keyframes bounce {{
-        0%, 100% {{ transform: translateY(0); }}
-        50% {{ transform: translateY(-10px); }}
-    }}
+    @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
+    @keyframes bounce {{ 0%, 100% {{ transform: translateY(0); }} 50% {{ transform: translateY(-10px); }} }}
     
     .metric-label {{
         font-size: 0.75rem;
@@ -153,23 +131,9 @@ st.markdown(f"""
         background-clip: text;
     }}
     
-    /* ── Hero Section ── */
-    .hero {{
-        text-align: center;
-        padding: 48px 0 32px;
-        animation: fadeInDown 0.8s ease-out;
-    }}
+    .hero {{ text-align: center; padding: 48px 0 32px; animation: fadeInDown 0.8s ease-out; }}
     
-    @keyframes fadeInDown {{
-        from {{
-            opacity: 0;
-            transform: translateY(-30px);
-        }}
-        to {{
-            opacity: 1;
-            transform: translateY(0);
-        }}
-    }}
+    @keyframes fadeInDown {{ from {{ opacity: 0; transform: translateY(-30px); }} to {{ opacity: 1; transform: translateY(0); }} }}
     
     .hero-title {{
         font-size: 3.2rem;
@@ -192,7 +156,6 @@ st.markdown(f"""
         font-weight: 300;
     }}
     
-    /* ── Prediction Result Box ── */
     .prediction-box {{
         background: linear-gradient(135deg, rgba(0, 217, 255, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
         border: 2px solid var(--accent-cyan);
@@ -204,260 +167,60 @@ st.markdown(f"""
         overflow: hidden;
     }}
     
-    @keyframes scaleIn {{
-        0% {{
-            opacity: 0;
-            transform: scale(0.9);
-        }}
-        100% {{
-            opacity: 1;
-            transform: scale(1);
-        }}
-    }}
-    
-    @keyframes pulse {{
-        0%, 100% {{
-            box-shadow: 0 0 20px rgba(0, 217, 255, 0.15);
-        }}
-        50% {{
-            box-shadow: 0 0 50px rgba(0, 217, 255, 0.3);
-        }}
-    }}
+    @keyframes scaleIn {{ 0% {{ opacity: 0; transform: scale(0.9); }} 100% {{ opacity: 1; transform: scale(1); }} }}
+    @keyframes pulse {{ 0%, 100% {{ box-shadow: 0 0 20px rgba(0, 217, 255, 0.15); }} 50% {{ box-shadow: 0 0 50px rgba(0, 217, 255, 0.3); }} }}
     
     .prediction-box::before {{
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
+        content: ''; position: absolute; top: -50%; right: -50%; width: 200%; height: 200%;
         background: radial-gradient(circle, rgba(0, 217, 255, 0.1) 0%, transparent 70%);
         animation: shimmer 3s ease-in-out infinite;
     }}
     
-    @keyframes shimmer {{
-        0%, 100% {{ transform: translate(0, 0); }}
-        50% {{ transform: translate(20px, 20px); }}
-    }}
+    @keyframes shimmer {{ 0%, 100% {{ transform: translate(0, 0); }} 50% {{ transform: translate(20px, 20px); }} }}
     
-    .result-label {{
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 3px;
-        color: var(--text-secondary);
-        margin-bottom: 12px;
-        font-weight: 600;
-    }}
+    .result-label {{ font-size: 0.8rem; text-transform: uppercase; letter-spacing: 3px; color: var(--text-secondary); margin-bottom: 12px; font-weight: 600; }}
+    .result-value {{ font-size: 4.2rem; font-weight: 900; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin: 12px 0; }}
+    .result-unit {{ font-size: 1.5rem; font-weight: 600; color: var(--accent-cyan); letter-spacing: 1px; }}
     
-    .result-value {{
-        font-size: 4.2rem;
-        font-weight: 900;
-        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1;
-        margin: 12px 0;
-    }}
-    
-    .result-unit {{
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--accent-cyan);
-        letter-spacing: 1px;
-    }}
-    
-    /* ── Demand Status Tags ── */
     .demand-tag {{
-        display: inline-block;
-        margin-top: 20px;
-        padding: 10px 24px;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        letter-spacing: 1.2px;
-        text-transform: uppercase;
+        display: inline-block; margin-top: 20px; padding: 10px 24px; border-radius: 50px;
+        font-size: 0.85rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
         animation: fadeInUp 0.6s ease-out 0.3s both;
     }}
     
-    @keyframes fadeInUp {{
-        from {{
-            opacity: 0;
-            transform: translateY(20px);
-        }}
-        to {{
-            opacity: 1;
-            transform: translateY(0);
-        }}
-    }}
+    @keyframes fadeInUp {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
     
-    .tag-low {{
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%);
-        color: var(--accent-green);
-        border: 1.5px solid var(--accent-green);
-        box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
-    }}
+    .tag-low {{ background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.05) 100%); color: var(--accent-green); border: 1.5px solid var(--accent-green); box-shadow: 0 0 20px rgba(16, 185, 129, 0.1); }}
+    .tag-medium {{ background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.05) 100%); color: #f59e0b; border: 1.5px solid #f59e0b; box-shadow: 0 0 20px rgba(245, 158, 11, 0.1); }}
+    .tag-high {{ background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%); color: #ef4444; border: 1.5px solid #ef4444; box-shadow: 0 0 20px rgba(239, 68, 68, 0.1); }}
     
-    .tag-medium {{
-        background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(245, 158, 11, 0.05) 100%);
-        color: #f59e0b;
-        border: 1.5px solid #f59e0b;
-        box-shadow: 0 0 20px rgba(245, 158, 11, 0.1);
-    }}
+    .divider {{ height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); margin: 40px 0; border: none; }}
     
-    .tag-high {{
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.05) 100%);
-        color: #ef4444;
-        border: 1.5px solid #ef4444;
-        box-shadow: 0 0 20px rgba(239, 68, 68, 0.1);
+    div[data-baseweb="input"] input, div[data-baseweb="select"] div, .stSlider [role="slider"] {{
+        background: rgba(30, 40, 60, 0.8) !important; color: var(--text-primary) !important;
+        border: 1px solid var(--border) !important; border-radius: 14px !important; transition: all 0.3s ease !important;
     }}
+    div[data-baseweb="input"] input:focus, div[data-baseweb="select"] div:focus {{ border-color: var(--accent-cyan) !important; box-shadow: 0 0 20px rgba(0, 217, 255, 0.2) !important; }}
+    .stSlider [role="slider"] {{ background: var(--accent-cyan) !important; }}
+    label, .stSelectbox label, .stSlider label, .stNumberInput label {{ color: var(--text-primary) !important; font-weight: 600 !important; font-size: 0.95rem !important; }}
     
-    /* ── Section Divider ── */
-    .divider {{
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--border), transparent);
-        margin: 40px 0;
-        border: none;
-    }}
+    .sidebar-title {{ font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2.5px; color: var(--accent-cyan); margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); font-weight: 700; }}
+    .sidebar-icon {{ font-size: 1.3rem; margin-right: 6px; }}
     
-    /* ── Input Elements ── */
-    div[data-baseweb="input"] input,
-    div[data-baseweb="select"] div,
-    .stSlider [role="slider"] {{
-        background: rgba(30, 40, 60, 0.8) !important;
-        color: var(--text-primary) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: 14px !important;
-        transition: all 0.3s ease !important;
-    }}
-    
-    div[data-baseweb="input"] input:focus,
-    div[data-baseweb="select"] div:focus {{
-        border-color: var(--accent-cyan) !important;
-        box-shadow: 0 0 20px rgba(0, 217, 255, 0.2) !important;
-    }}
-    
-    .stSlider [role="slider"] {{
-        background: var(--accent-cyan) !important;
-    }}
-    
-    /* ── Labels & Text ── */
-    label, .stSelectbox label, .stSlider label, .stNumberInput label {{
-        color: var(--text-primary) !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
-    }}
-    
-    /* ── Buttons ── */
-    .stButton > button {{
-        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple)) !important;
-        color: {DARK_BG} !important;
-        font-weight: 800 !important;
-        border: none !important;
-        border-radius: 16px !important;
-        padding: 16px 0 !important;
-        width: 100% !important;
-        font-size: 1.1rem !important;
-        letter-spacing: 1px !important;
-        text-transform: uppercase !important;
-        transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1) !important;
-        box-shadow: 0 8px 25px rgba(0, 217, 255, 0.25) !important;
-        position: relative !important;
-        overflow: hidden !important;
-    }}
-    
-    .stButton > button:hover {{
-        transform: translateY(-4px) scale(1.01) !important;
-        box-shadow: 0 12px 40px rgba(0, 217, 255, 0.4) !important;
-    }}
-    
-    .stButton > button:active {{
-        transform: scale(0.98) !important;
-    }}
-    
-    /* ── Sidebar Sections ── */
-    .sidebar-title {{
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        letter-spacing: 2.5px;
-        color: var(--accent-cyan);
-        margin: 28px 0 12px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid var(--border);
-        font-weight: 700;
-    }}
-    
-    .sidebar-icon {{
-        font-size: 1.3rem;
-        margin-right: 6px;
-    }}
-    
-    /* ── Insight Box ── */
     .insight-box {{
         background: linear-gradient(135deg, rgba(0, 217, 255, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%);
-        border-left: 4px solid var(--accent-cyan);
-        border-radius: 16px;
-        padding: 24px 28px;
-        margin-top: 24px;
+        border-left: 4px solid var(--accent-cyan); border-radius: 16px; padding: 24px 28px; margin-top: 24px;
         animation: slideInLeft 0.6s ease-out 0.5s both;
     }}
     
-    @keyframes slideInLeft {{
-        from {{
-            opacity: 0;
-            transform: translateX(-30px);
-        }}
-        to {{
-            opacity: 1;
-            transform: translateX(0);
-        }}
-    }}
+    @keyframes slideInLeft {{ from {{ opacity: 0; transform: translateX(-30px); }} to {{ opacity: 1; transform: translateX(0); }} }}
+    .insight-label {{ font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-secondary); margin-bottom: 8px; font-weight: 700; }}
+    .insight-text {{ font-size: 1rem; color: var(--text-primary); line-height: 1.7; font-weight: 400; }}
     
-    .insight-label {{
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        color: var(--text-secondary);
-        margin-bottom: 8px;
-        font-weight: 700;
-    }}
+    [data-testid="stHeader"] {{ background: transparent !important; }}
+    .footer {{ text-align: center; font-size: 0.75rem; color: var(--text-secondary); padding: 24px 0; border-top: 1px solid var(--border); margin-top: 40px; }}
     
-    .insight-text {{
-        font-size: 1rem;
-        color: var(--text-primary);
-        line-height: 1.7;
-        font-weight: 400;
-    }}
-    
-    /* ── Header Hide ── */
-    [data-testid="stHeader"] {{
-        background: transparent !important;
-    }}
-    
-    /* ── Footer ── */
-    .footer {{
-        text-align: center;
-        font-size: 0.75rem;
-        color: var(--text-secondary);
-        padding: 24px 0;
-        border-top: 1px solid var(--border);
-        margin-top: 40px;
-    }}
-    
-    /* ── Responsive Design ── */
-    @media (max-width: 768px) {{
-        .hero-title {{
-            font-size: 2.2rem;
-        }}
-        
-        .result-value {{
-            font-size: 3rem;
-        }}
-        
-        .metric-card {{
-            padding: 16px 12px;
-        }}
-    }}
+    @media (max-width: 768px) {{ .hero-title {{ font-size: 2.2rem; }} .result-value {{ font-size: 3rem; }} .metric-card {{ padding: 16px 12px; }} }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -470,10 +233,12 @@ def load_model(path: str = "xgboost_smartgrid_model.pkl"):
 model = load_model()
 
 # ────────────────────────────── Constants & Configuration ───────────────────
+# EXTREMELY IMPORTANT: This exactly matches the error message feature order!
 FEATURE_ORDER = [
+    "meter_encoded",
     "avg_voltage",
-    "minute",
     "hour",
+    "minute",
     "dayofweek",
     "is_weekend",
     "lag_1_power",
@@ -485,60 +250,31 @@ DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",
 
 # ────────────────────────────── Helper Functions ──────────────────────────
 def classify_load(kw: float) -> tuple[str, str, str]:
-    """Classify power consumption into demand categories."""
-    if kw < 1.5:
-        return "Low Demand", "tag-low", "🟢"
-    elif kw < 3.5:
-        return "Moderate Demand", "tag-medium", "🟡"
+    if kw < 1.5: return "Low Demand", "tag-low", "🟢"
+    elif kw < 3.5: return "Moderate Demand", "tag-medium", "🟡"
     return "High Demand", "tag-high", "🔴"
 
 def build_gauge_chart(value: float, max_val: float = 6.0) -> go.Figure:
-    """Create animated gauge chart with gradient styling."""
     fig = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=round(value, 3),
-        number={
-            "font": {"size": 56, "color": ACCENT_CYAN, "family": "Outfit"},
-            "suffix": " kW",
-        },
+        mode="gauge+number", value=round(value, 3),
+        number={"font": {"size": 56, "color": ACCENT_CYAN, "family": "Outfit"}, "suffix": " kW"},
         gauge={
-            "axis": {
-                "range": [0, max_val],
-                "tickwidth": 2,
-                "tickcolor": "#475569",
-                "dtick": max_val / 6,
-                "tickfont": {"size": 12, "color": TEXT_SECONDARY, "family": "Poppins"},
-            },
+            "axis": {"range": [0, max_val], "tickwidth": 2, "tickcolor": "#475569", "dtick": max_val / 6, "tickfont": {"size": 12, "color": TEXT_SECONDARY, "family": "Poppins"}},
             "bar": {"color": ACCENT_CYAN, "thickness": 0.4},
-            "bgcolor": "rgba(30, 40, 60, 0.4)",
-            "borderwidth": 2,
-            "bordercolor": ACCENT_CYAN,
+            "bgcolor": "rgba(30, 40, 60, 0.4)", "borderwidth": 2, "bordercolor": ACCENT_CYAN,
             "steps": [
                 {"range": [0, max_val * 0.25], "color": "rgba(16, 185, 129, 0.08)"},
                 {"range": [max_val * 0.25, max_val * 0.58], "color": "rgba(245, 158, 11, 0.08)"},
                 {"range": [max_val * 0.58, max_val], "color": "rgba(239, 68, 68, 0.08)"},
             ],
-            "threshold": {
-                "line": {"color": ACCENT_PURPLE, "width": 4},
-                "thickness": 0.9,
-                "value": value,
-            },
+            "threshold": {"line": {"color": ACCENT_PURPLE, "width": 4}, "thickness": 0.9, "value": value},
         },
     ))
-    fig.update_layout(
-        height=300,
-        margin=dict(t=40, b=20, l=40, r=40),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font={"family": "Poppins", "color": TEXT_PRIMARY},
-    )
+    fig.update_layout(height=300, margin=dict(t=40, b=20, l=40, r=40), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font={"family": "Poppins", "color": TEXT_PRIMARY})
     return fig
 
 def build_radar_chart(data: dict) -> go.Figure:
-    """Create feature radar chart with normalized values."""
-    labels = list(data.keys())
-    raw = list(data.values())
-    
+    labels, raw = list(data.keys()), list(data.values())
     arr = np.array(raw, dtype=float)
     lo, hi = arr.min(), arr.max()
     norm = ((arr - lo) / (hi - lo + 1e-9)).tolist()
@@ -547,174 +283,95 @@ def build_radar_chart(data: dict) -> go.Figure:
     
     fig = go.Figure()
     fig.add_trace(go.Scatterpolar(
-        r=norm,
-        theta=labels_closed,
-        fill="toself",
-        fillcolor="rgba(0, 217, 255, 0.15)",
-        line=dict(color=ACCENT_CYAN, width=2.5),
-        hovertemplate="%{theta}: %{customdata:.3f}<extra></extra>",
-        customdata=raw + [raw[0]],
-        name="Features",
+        r=norm, theta=labels_closed, fill="toself", fillcolor="rgba(0, 217, 255, 0.15)",
+        line=dict(color=ACCENT_CYAN, width=2.5), hovertemplate="%{theta}: %{customdata:.3f}<extra></extra>",
+        customdata=raw + [raw[0]], name="Features",
     ))
     
     fig.update_layout(
         polar=dict(
             bgcolor="rgba(0,0,0,0)",
-            radialaxis=dict(
-                visible=True,
-                range=[0, 1],
-                gridcolor="rgba(0, 217, 255, 0.06)",
-                tickfont=dict(size=10, color=TEXT_SECONDARY),
-            ),
-            angularaxis=dict(
-                gridcolor="rgba(0, 217, 255, 0.08)",
-                tickfont=dict(size=11, color=TEXT_SECONDARY, family="Poppins"),
-            ),
+            radialaxis=dict(visible=True, range=[0, 1], gridcolor="rgba(0, 217, 255, 0.06)", tickfont=dict(size=10, color=TEXT_SECONDARY)),
+            angularaxis=dict(gridcolor="rgba(0, 217, 255, 0.08)", tickfont=dict(size=11, color=TEXT_SECONDARY, family="Poppins")),
         ),
-        showlegend=False,
-        height=350,
-        margin=dict(t=50, b=50, l=70, r=70),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(family="Poppins", color=TEXT_PRIMARY),
+        showlegend=False, height=350, margin=dict(t=50, b=50, l=70, r=70), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(family="Poppins", color=TEXT_PRIMARY),
     )
     return fig
 
 def build_bar_chart(data: dict) -> go.Figure:
-    """Create horizontal bar chart for feature values."""
-    labels = list(data.keys())
-    values = list(data.values())
-    colors = [ACCENT_CYAN, ACCENT_PURPLE, ACCENT_GREEN, "#f59e0b", "#ef4444", "#06b6d4", "#8b5cf6", "#ec4899"]
+    labels, values = list(data.keys()), list(data.values())
+    colors = [ACCENT_CYAN, ACCENT_PURPLE, ACCENT_GREEN, "#f59e0b", "#ef4444", "#06b6d4", "#8b5cf6", "#ec4899", "#3b82f6"]
     
     fig = go.Figure(go.Bar(
-        y=labels,
-        x=values,
-        orientation="h",
-        marker=dict(
-            color=colors[:len(labels)],
-            line=dict(width=0),
-            cornerradius=8,
-        ),
-        hovertemplate="%{y}: <b>%{x:.3f}</b><extra></extra>",
-        text=[f"{v:.2f}" for v in values],
-        textposition="outside",
-        textfont=dict(color=TEXT_PRIMARY, size=11, family="Poppins"),
+        y=labels, x=values, orientation="h",
+        marker=dict(color=colors[:len(labels)], line=dict(width=0), cornerradius=8),
+        hovertemplate="%{y}: <b>%{x:.3f}</b><extra></extra>", text=[f"{v:.2f}" for v in values],
+        textposition="outside", textfont=dict(color=TEXT_PRIMARY, size=11, family="Poppins"),
     ))
     
     fig.update_layout(
-        height=350,
-        margin=dict(t=20, b=20, l=100, r=60),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(
-            gridcolor="rgba(0, 217, 255, 0.04)",
-            tickfont=dict(color=TEXT_SECONDARY, size=11, family="Poppins"),
-            title=None,
-            showgrid=True,
-        ),
-        yaxis=dict(
-            tickfont=dict(color=TEXT_SECONDARY, size=11, family="Poppins"),
-            title=None,
-        ),
-        font=dict(family="Poppins", color=TEXT_PRIMARY),
-        showlegend=False,
+        height=350, margin=dict(t=20, b=20, l=100, r=60), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(gridcolor="rgba(0, 217, 255, 0.04)", tickfont=dict(color=TEXT_SECONDARY, size=11, family="Poppins"), title=None, showgrid=True),
+        yaxis=dict(tickfont=dict(color=TEXT_SECONDARY, size=11, family="Poppins"), title=None),
+        font=dict(family="Poppins", color=TEXT_PRIMARY), showlegend=False,
     )
     return fig
 
 # ────────────────────────────── Sidebar Configuration ──────────────────────
 with st.sidebar:
-    # Header with logo
     st.markdown("""
     <div style="text-align:center; padding:20px 0 10px;">
         <div style="font-size:3rem; margin-bottom:8px;">⚡</div>
-        <h2 style="margin:0; font-weight:800; font-size:1.8rem;
-            background:linear-gradient(135deg, {0}, {1});
-            -webkit-background-clip:text;
-            -webkit-text-fill-color:transparent;">
+        <h2 style="margin:0; font-weight:800; font-size:1.8rem; background:linear-gradient(135deg, {0}, {1}); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
             Grid Predictor
         </h2>
-        <p style="font-size:0.8rem; color:#94a3b8; margin:4px 0 0;">
-            Real-time Power Forecasting
-        </p>
+        <p style="font-size:0.8rem; color:#94a3b8; margin:4px 0 0;">Real-time Power Forecasting</p>
     </div>
     <div class="divider"></div>
     """.format(ACCENT_CYAN, ACCENT_PURPLE), unsafe_allow_html=True)
     
-    # Electrical readings section
-    st.markdown('<p class="sidebar-title"><span class="sidebar-icon">⚙️</span>Electrical Readings</p>', unsafe_allow_html=True)
-    avg_voltage = st.slider(
-        "Average Voltage (V)",
-        min_value=200.0,
-        max_value=260.0,
-        value=230.0,
-        step=0.5,
-        help="Mean voltage from smart meter (200-260V)",
+    # ── 1. Household Selection (The missing feature) ──
+    st.markdown('<p class="sidebar-title"><span class="sidebar-icon">🏠</span>Target Area</p>', unsafe_allow_html=True)
+    meter_encoded = st.selectbox(
+        "Select Household / Meter",
+        options=[0, 1, 2, 3, 4, 5],
+        format_func=lambda x: f"Household {x}",
+        help="Select the specific household ID for the prediction."
     )
     
-    # Temporal features
+    # ── 2. Electrical readings ──
+    st.markdown('<p class="sidebar-title"><span class="sidebar-icon">⚙️</span>Electrical Readings</p>', unsafe_allow_html=True)
+    avg_voltage = st.slider("Average Voltage (V)", min_value=200.0, max_value=260.0, value=230.0, step=0.5)
+    
+    # ── 3. Temporal features ──
     st.markdown('<p class="sidebar-title"><span class="sidebar-icon">🕒</span>Time & Date</p>', unsafe_allow_html=True)
     input_time = st.time_input("Time of Day", value=time(14, 30))
-    day_of_week = st.selectbox(
-        "Day of Week",
-        options=list(range(7)),
-        format_func=lambda d: f"{DAY_NAMES[d]}  {'📅' if d < 5 else '🌴'}",
-        index=0,
-    )
+    day_of_week = st.selectbox("Day of Week", options=list(range(7)), format_func=lambda d: f"{DAY_NAMES[d]}  {'📅' if d < 5 else '🌴'}", index=0)
     is_weekend = 1 if day_of_week >= 5 else 0
     
-    # Lag features
-    st.markdown('<p class="sidebar-title"><span class="sidebar-icon">📊</span>Historical Power Data</p>', unsafe_allow_html=True)
-    lag_1 = st.slider(
-        "Lag-1 Power (kW)",
-        min_value=0.0,
-        max_value=12.0,
-        value=1.2,
-        step=0.01,
-        help="Previous hour power consumption",
-    )
-    lag_2 = st.slider(
-        "Lag-2 Power (kW)",
-        min_value=0.0,
-        max_value=12.0,
-        value=1.1,
-        step=0.01,
-        help="Two hours ago power consumption",
-    )
-    rolling_mean = st.slider(
-        "Rolling Mean-3 (kW)",
-        min_value=0.0,
-        max_value=12.0,
-        value=1.15,
-        step=0.01,
-        help="3-hour average power consumption",
-    )
+    # ── 4. Lag features ──
+    st.markdown('<p class="sidebar-title"><span class="sidebar-icon">📊</span>Historical Data</p>', unsafe_allow_html=True)
+    lag_1 = st.slider("Lag-1 Power (kW)", min_value=0.0, max_value=12.0, value=1.2, step=0.01)
+    lag_2 = st.slider("Lag-2 Power (kW)", min_value=0.0, max_value=12.0, value=1.1, step=0.01)
+    rolling_mean = st.slider("Rolling Mean-3 (kW)", min_value=0.0, max_value=12.0, value=1.15, step=0.01)
     
     st.markdown('<div class="divider" style="margin:20px 0;"></div>', unsafe_allow_html=True)
-    st.markdown(f"""
-    <p style="text-align:center; font-size:0.7rem; color:{TEXT_SECONDARY};
-              line-height:1.6;">
-        <strong>Model: XGBoost</strong><br>
-        Features: 8 | Target: Active Power<br>
-        Trained on household consumption data
-    </p>
-    """, unsafe_allow_html=True)
+    st.markdown(f'<p style="text-align:center; font-size:0.7rem; color:{TEXT_SECONDARY}; line-height:1.6;"><strong>Model: XGBoost</strong><br>Features: 9 | Target: Active Power</p>', unsafe_allow_html=True)
 
 # ────────────────────────────── Main Content Area ───────────────────────────
-# Hero section
 st.markdown(f"""
 <div class="hero">
     <div class="hero-title">⚡ Smart Grid Load Predictor</div>
     <div class="hero-subtitle">
-        Predict real-time power demand with advanced machine learning.
-        Adjust parameters on the left, then click <strong>Predict</strong>.
+        The system is completely reactive. Try adjusting the parameters on the left 
+        and watch the AI re-calculate predictions instantly in real-time.
     </div>
 </div>
 <div class="divider"></div>
 """, unsafe_allow_html=True)
 
-# Input summary cards
+# ── Summary Cards ──
 col1, col2, col3, col4 = st.columns(4, gap="medium")
-
 card_items = [
     ("🔌", "Voltage", f"{avg_voltage:.1f} V"),
     ("⏰", "Time", f"{input_time.strftime('%H:%M')}"),
@@ -733,111 +390,86 @@ for col, (icon, label, value) in zip([col1, col2, col3, col4], card_items):
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-# Predict button
-predict_btn = st.button("🔮  PREDICT GRID LOAD", use_container_width=True)
+# ────────────────────────────── REAL-TIME PREDICTION ───────────────────────────
+# We removed the predict button! The app now updates automatically and instantly.
 
-if predict_btn:
-    # Build input features
-    raw_features = {
-        "avg_voltage": avg_voltage,
-        "minute": input_time.minute,
-        "hour": input_time.hour,
-        "dayofweek": day_of_week,
-        "is_weekend": is_weekend,
-        "lag_1_power": lag_1,
-        "lag_2_power": lag_2,
-        "rolling_mean_3": rolling_mean,
-    }
+raw_features = {
+    "meter_encoded": meter_encoded,
+    "avg_voltage": avg_voltage,
+    "hour": input_time.hour,
+    "minute": input_time.minute,
+    "dayofweek": day_of_week,
+    "is_weekend": is_weekend,
+    "lag_1_power": lag_1,
+    "lag_2_power": lag_2,
+    "rolling_mean_3": rolling_mean,
+}
+
+# Create dataframe with exact feature order
+input_df = pd.DataFrame({k: [v] for k, v in raw_features.items()})
+input_df = input_df[FEATURE_ORDER]
+
+try:
+    # Make prediction automatically
+    prediction = float(model.predict(input_df)[0])
+    demand_label, demand_class, demand_emoji = classify_load(prediction)
     
-    # Create dataframe with exact feature order
-    input_df = pd.DataFrame({k: [v] for k, v in raw_features.items()})
-    input_df = input_df[FEATURE_ORDER]
+    # Display prediction result
+    st.markdown(f"""
+    <div class="glass-card prediction-box">
+        <div class="result-label">📊 Predicted Active Power</div>
+        <div class="result-value">{prediction:.2f}</div>
+        <div class="result-unit">kilowatts</div>
+        <div class="demand-tag {demand_class}">
+            {demand_emoji} {demand_label}
+        </div>
+    </div>
+    <br>
+    """, unsafe_allow_html=True)
     
-    try:
-        # Make prediction
-        prediction = float(model.predict(input_df)[0])
-        demand_label, demand_class, demand_emoji = classify_load(prediction)
-        
-        # Display prediction result
-        st.markdown(f"""
-        <div class="glass-card prediction-box">
-            <div class="result-label">📊 Predicted Active Power</div>
-            <div class="result-value">{prediction:.2f}</div>
-            <div class="result-unit">kilowatts</div>
-            <div class="demand-tag {demand_class}">
-                {demand_emoji} {demand_label}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        # Analytics charts
-        st.markdown(f"""
-        <div class="glass-card" style="padding:16px 20px 8px; background: rgba(0,0,0,0.2);">
-            <p style="text-align:center; font-size:0.75rem;
-               text-transform:uppercase; letter-spacing:2px;
-               color:{TEXT_SECONDARY}; margin:0; font-weight:700;">
-               📊 Visualization Analytics
-            </p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # Charts in columns
-        gauge_col, radar_col = st.columns(2, gap="medium")
-        
-        with gauge_col:
-            st.plotly_chart(
-                build_gauge_chart(prediction),
-                use_container_width=True,
-                config={"displayModeBar": False, "responsive": True}
-            )
-        
-        with radar_col:
-            st.plotly_chart(
-                build_radar_chart(raw_features),
-                use_container_width=True,
-                config={"displayModeBar": False, "responsive": True}
-            )
-        
-        # Feature values bar chart
-        st.plotly_chart(
-            build_bar_chart(raw_features),
-            use_container_width=True,
-            config={"displayModeBar": False, "responsive": True}
-        )
-        
-        # Smart recommendation
-        if prediction < 1.5:
-            icon, title, message = "💚", "Low Demand", (
-                "Grid load is minimal. Excellent opportunity to reduce generation, "
-                "shift maintenance tasks, or optimize battery storage."
-            )
-        elif prediction < 3.5:
-            icon, title, message = "⚙️", "Moderate Demand", (
-                "Power consumption is stable. Monitor trends closely for any sudden spikes. "
-                "Current capacity handles load efficiently."
-            )
-        else:
-            icon, title, message = "⚠️", "High Demand Alert", (
-                "Grid is under heavy load! Activate peaking plants immediately and "
-                "implement demand-response programs to prevent outages."
-            )
-        
-        st.markdown(f"""
-        <div class="glass-card insight-box">
-            <div class="insight-label">{icon} {title}</div>
-            <div class="insight-text">{message}</div>
-        </div>
-        """, unsafe_allow_html=True)
-        
-    except Exception as exc:
-        st.error(f"❌ **Prediction Error:** {str(exc)}")
+    # Analytics charts header
+    st.markdown(f"""
+    <div class="glass-card" style="padding:16px 20px 8px; background: rgba(0,0,0,0.2);">
+        <p style="text-align:center; font-size:0.75rem; text-transform:uppercase; letter-spacing:2px; color:{TEXT_SECONDARY}; margin:0; font-weight:700;">
+           📊 Live Visualization Analytics
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Charts in columns
+    gauge_col, radar_col = st.columns(2, gap="medium")
+    
+    with gauge_col:
+        st.plotly_chart(build_gauge_chart(prediction), use_container_width=True, config={"displayModeBar": False})
+    
+    with radar_col:
+        st.plotly_chart(build_radar_chart(raw_features), use_container_width=True, config={"displayModeBar": False})
+    
+    # Feature values bar chart
+    st.plotly_chart(build_bar_chart(raw_features), use_container_width=True, config={"displayModeBar": False})
+    
+    # Smart recommendation
+    if prediction < 1.5:
+        icon, title, message = "💚", "Low Demand", "Grid load is minimal. Excellent opportunity to reduce generation, shift maintenance tasks, or optimize battery storage."
+    elif prediction < 3.5:
+        icon, title, message = "⚙️", "Moderate Demand", "Power consumption is stable. Monitor trends closely for any sudden spikes. Current capacity handles load efficiently."
+    else:
+        icon, title, message = "⚠️", "High Demand Alert", "Grid is under heavy load! Activate peaking plants immediately and implement demand-response programs to prevent outages."
+    
+    st.markdown(f"""
+    <div class="glass-card insight-box">
+        <div class="insight-label">{icon} {title}</div>
+        <div class="insight-text">{message}</div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+except Exception as exc:
+    st.error(f"❌ **Prediction Error:** {str(exc)}")
 
 # Footer
 st.markdown(f"""
 <div class="footer">
-    <p>Powered by XGBoost Machine Learning | Streamlit Web Framework</p>
+    <p>Powered by XGBoost Machine Learning | Reactive Streamlit Architecture</p>
     <p>© 2026 Smart Grid Predictor | Real-time Power Consumption Analytics</p>
 </div>
 """, unsafe_allow_html=True)
