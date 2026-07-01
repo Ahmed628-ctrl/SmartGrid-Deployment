@@ -88,30 +88,29 @@ st.markdown(f"""
         padding: 24px 16px;
         text-align: center;
         transition: all 0.5s cubic-bezier(0.23, 1, 0.320, 1);
-        animation: float 3s ease-in-out infinite;
+        animation: float 4s ease-in-out infinite;
     }}
     
     .metric-card:nth-child(1) {{ animation-delay: 0s; }}
-    .metric-card:nth-child(2) {{ animation-delay: 0.1s; }}
-    .metric-card:nth-child(3) {{ animation-delay: 0.2s; }}
-    .metric-card:nth-child(4) {{ animation-delay: 0.3s; }}
+    .metric-card:nth-child(2) {{ animation-delay: 0.15s; }}
+    .metric-card:nth-child(3) {{ animation-delay: 0.3s; }}
+    .metric-card:nth-child(4) {{ animation-delay: 0.45s; }}
     
     @keyframes float {{
         0%, 100% {{ transform: translateY(0px); }}
-        50% {{ transform: translateY(-12px); }}
+        50% {{ transform: translateY(-8px); }}
     }}
     
+    /* Emoji icons are now static by default (no continuous spin). 
+       A gentle scale/lift only happens on hover for a subtle, controlled effect. */
     .metric-icon {{
         font-size: 2.4rem;
         margin-bottom: 8px;
         display: inline-block;
-        animation: spin 4s linear infinite;
+        transition: transform 0.35s cubic-bezier(0.23, 1, 0.320, 1);
     }}
     
-    .metric-card:hover .metric-icon {{ animation: bounce 0.6s ease-in-out; }}
-    
-    @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
-    @keyframes bounce {{ 0%, 100% {{ transform: translateY(0); }} 50% {{ transform: translateY(-10px); }} }}
+    .metric-card:hover .metric-icon {{ transform: scale(1.15) translateY(-4px); }}
     
     .metric-label {{
         font-size: 0.75rem;
