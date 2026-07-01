@@ -215,7 +215,7 @@ label, .stSelectbox label, .stSlider label, .stNumberInput label,
 """, unsafe_allow_html=True)
 # ──────────────────────────── Load Model ─────────────────────────
 @st.cache_resource(show_spinner=False)
-def load_model(path: str = "xgboost_model.pkl"):
+def load_model(path: str = "xgboost_smartgrid_model"):
     """Load the trained XGBoost model once and cache it."""
     return joblib.load(path)
 model = load_model()
