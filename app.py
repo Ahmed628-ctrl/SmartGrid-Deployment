@@ -14,6 +14,7 @@ import numpy as np
 import joblib
 import plotly.graph_objects as go
 from datetime import datetime, time
+
 # ──────────────────────────── Page Config ────────────────────────
 st.set_page_config(
     page_title="Smart Grid Load Predictor",
@@ -21,11 +22,13 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+
 # ──────────────────────────── Custom CSS ─────────────────────────
 st.markdown("""
 <style>
 /* ── Google Font ── */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
+
 /* ── Root Variables ── */
 :root {
     --bg-primary:    #0a0e1a;
@@ -40,6 +43,7 @@ st.markdown("""
     --glow-cyan:     0 0 25px rgba(34, 211, 238, 0.25);
     --glow-violet:   0 0 25px rgba(167, 139, 250, 0.25);
 }
+
 /* ── Global ── */
 html, body, [data-testid="stAppViewContainer"],
 [data-testid="stApp"] {
@@ -47,13 +51,16 @@ html, body, [data-testid="stAppViewContainer"],
     color: var(--text-primary) !important;
     font-family: 'Inter', sans-serif !important;
 }
+
 [data-testid="stSidebar"] {
     background: linear-gradient(195deg, #0f172a 0%, #1e1b4b 100%) !important;
     border-right: 1px solid var(--glass-border) !important;
 }
+
 [data-testid="stSidebar"] * {
     color: var(--text-primary) !important;
 }
+
 /* ── Glass Card ── */
 .glass-card {
     background: var(--bg-card);
@@ -65,10 +72,12 @@ html, body, [data-testid="stAppViewContainer"],
     transition: transform 0.35s cubic-bezier(.22,1,.36,1),
                 box-shadow 0.35s cubic-bezier(.22,1,.36,1);
 }
+
 .glass-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--glow-cyan);
 }
+
 /* ── Metric card ── */
 .metric-card {
     text-align: center;
@@ -90,6 +99,7 @@ html, body, [data-testid="stAppViewContainer"],
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
+
 /* ── Hero header ── */
 .hero {
     text-align: center;
@@ -111,6 +121,7 @@ html, body, [data-testid="stAppViewContainer"],
     margin: 0 auto;
     line-height: 1.6;
 }
+
 /* ── Prediction result ── */
 .result-box {
     text-align: center;
@@ -122,10 +133,12 @@ html, body, [data-testid="stAppViewContainer"],
     border: 1px solid rgba(34,211,238,0.25);
     animation: resultPulse 2.5s ease-in-out infinite;
 }
+
 @keyframes resultPulse {
     0%, 100% { box-shadow: 0 0 20px rgba(34,211,238,0.10); }
     50%      { box-shadow: 0 0 45px rgba(34,211,238,0.22); }
 }
+
 .result-label {
     font-size: 0.85rem;
     text-transform: uppercase;
@@ -145,6 +158,7 @@ html, body, [data-testid="stAppViewContainer"],
     font-weight: 600;
     color: var(--accent-cyan);
 }
+
 .result-tag {
     display: inline-block;
     margin-top: 14px;
@@ -157,6 +171,7 @@ html, body, [data-testid="stAppViewContainer"],
 .tag-low    { background: rgba(52,211,153,0.15); color: var(--accent-green); border: 1px solid rgba(52,211,153,0.3); }
 .tag-medium { background: rgba(251,191,36,0.15); color: var(--accent-amber); border: 1px solid rgba(251,191,36,0.3); }
 .tag-high   { background: rgba(248,113,113,0.15); color: #f87171;            border: 1px solid rgba(248,113,113,0.3); }
+
 /* ── Sidebar section labels ── */
 .sidebar-section {
     font-size: 0.72rem;
@@ -167,6 +182,7 @@ html, body, [data-testid="stAppViewContainer"],
     padding-bottom: 4px;
     border-bottom: 1px solid var(--glass-border);
 }
+
 /* ── Buttons ── */
 .stButton > button {
     background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet)) !important;
@@ -185,8 +201,10 @@ html, body, [data-testid="stAppViewContainer"],
     transform: scale(1.02) !important;
     box-shadow: 0 6px 30px rgba(34,211,238,0.4) !important;
 }
+
 /* ── Streamlit overrides ── */
 [data-testid="stHeader"]  { background: transparent !important; }
+
 div[data-baseweb="input"] input,
 div[data-baseweb="select"] div {
     background: rgba(15,23,42,0.8) !important;
@@ -194,14 +212,17 @@ div[data-baseweb="select"] div {
     border: 1px solid var(--glass-border) !important;
     border-radius: 10px !important;
 }
+
 .stSlider [data-baseweb="slider"] div[role="slider"] {
     background: var(--accent-cyan) !important;
 }
+
 label, .stSelectbox label, .stSlider label, .stNumberInput label,
 .stTimeInput label {
     color: var(--text-primary) !important;
     font-weight: 500 !important;
 }
+
 /* ── Divider ── */
 .neon-divider {
     height: 2px;
@@ -213,12 +234,15 @@ label, .stSelectbox label, .stSlider label, .stNumberInput label,
 }
 </style>
 """, unsafe_allow_html=True)
+
 # ──────────────────────────── Load Model ─────────────────────────
 @st.cache_resource(show_spinner=False)
-def load_model(path: str = "xgboost_smartgrid_model"):
-    """Load the trained XGBoost model once and cache it."""
+def load_model(path: str = "xgboost_smartgrid_model.pkl"):
+    """Load the trained XGBoost model once and cache it. (Fixed File Extension)"""
     return joblib.load(path)
+
 model = load_model()
+
 # ──────────────────────────── Constants ──────────────────────────
 # Exact feature order used during training in Colab.
 # Changing this list or its order will cause a ValueError.
@@ -232,10 +256,12 @@ FEATURE_ORDER = [
     "lag_2_power",
     "rolling_mean_3",
 ]
+
 DAY_NAMES = [
     "Monday", "Tuesday", "Wednesday", "Thursday",
     "Friday", "Saturday", "Sunday",
 ]
+
 # ──────────────────────────── Helpers ────────────────────────────
 def classify_load(kw: float) -> tuple[str, str, str]:
     """Return (label, css‑class, emoji) based on predicted kW."""
@@ -244,6 +270,7 @@ def classify_load(kw: float) -> tuple[str, str, str]:
     elif kw < 3.5:
         return "MODERATE DEMAND", "tag-medium", "🟡"
     return "HIGH DEMAND", "tag-high", "🔴"
+
 def build_gauge(value: float, max_val: float = 6.0) -> go.Figure:
     """Plotly gauge with neon dark theme."""
     fig = go.Figure(go.Indicator(
@@ -282,16 +309,19 @@ def build_gauge(value: float, max_val: float = 6.0) -> go.Figure:
         font={"family": "Inter"},
     )
     return fig
+
 def build_feature_radar(data: dict) -> go.Figure:
     """Radar chart showing normalized input features."""
     labels = list(data.keys())
     raw    = list(data.values())
+    
     # Normalize to 0‑1 for visual comparison
     arr   = np.array(raw, dtype=float)
     lo, hi = arr.min(), arr.max()
     norm  = ((arr - lo) / (hi - lo + 1e-9)).tolist()
     norm += [norm[0]]          # close the polygon
     labels_closed = labels + [labels[0]]
+    
     fig = go.Figure()
     # Filled area
     fig.add_trace(go.Scatterpolar(
@@ -325,6 +355,7 @@ def build_feature_radar(data: dict) -> go.Figure:
         font=dict(family="Inter"),
     )
     return fig
+
 def build_feature_bar(data: dict) -> go.Figure:
     """Horizontal bar chart of raw feature values."""
     labels = list(data.keys())
@@ -333,6 +364,7 @@ def build_feature_bar(data: dict) -> go.Figure:
         "#22d3ee", "#a78bfa", "#34d399", "#fbbf24",
         "#f87171", "#818cf8", "#fb923c", "#38bdf8",
     ]
+    
     fig = go.Figure(go.Bar(
         y=labels,
         x=values,
@@ -361,6 +393,7 @@ def build_feature_bar(data: dict) -> go.Figure:
         font=dict(family="Inter"),
     )
     return fig
+
 # ──────────────────────────── Sidebar ────────────────────────────
 with st.sidebar:
     st.markdown("""
@@ -377,7 +410,9 @@ with st.sidebar:
         </p>
     </div>
     """, unsafe_allow_html=True)
+    
     st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
+    
     # ── Electrical readings ──
     st.markdown('<p class="sidebar-section">⚙️ Electrical Readings</p>',
                 unsafe_allow_html=True)
@@ -386,6 +421,7 @@ with st.sidebar:
         min_value=200.0, max_value=260.0, value=230.0, step=0.5,
         help="Mean voltage recorded by the smart meter.",
     )
+    
     # ── Temporal features ──
     st.markdown('<p class="sidebar-section">🕒 Temporal Features</p>',
                 unsafe_allow_html=True)
@@ -397,6 +433,7 @@ with st.sidebar:
         index=0,
     )
     is_weekend = 1 if day_of_week >= 5 else 0
+    
     # ── Lag features ──
     st.markdown('<p class="sidebar-section">📈 Lag Features</p>',
                 unsafe_allow_html=True)
@@ -409,6 +446,7 @@ with st.sidebar:
     rolling_mean = st.number_input("Rolling Mean‑3 (kW)", min_value=0.0,
                                    max_value=12.0, value=1.15, step=0.01,
                                    format="%.3f")
+    
     st.markdown('<div class="neon-divider"></div>', unsafe_allow_html=True)
     st.markdown("""
     <p style="text-align:center; font-size:0.7rem; color:#475569;
@@ -416,6 +454,7 @@ with st.sidebar:
         Model: XGBoost · Features: 8 · Target: Active Power (kW)
     </p>
     """, unsafe_allow_html=True)
+
 # ──────────────────────────── Main Area ──────────────────────────
 # Hero header
 st.markdown("""
@@ -429,6 +468,7 @@ st.markdown("""
 </div>
 <div class="neon-divider"></div>
 """, unsafe_allow_html=True)
+
 # ── Input summary cards ──
 card_data = [
     ("🔌", "Voltage",      f"{avg_voltage:.1f} V"),
@@ -436,6 +476,7 @@ card_data = [
     ("📅", "Day",          DAY_NAMES[day_of_week]),
     ("📊", "Rolling Mean", f"{rolling_mean:.3f} kW"),
 ]
+
 cols = st.columns(4, gap="medium")
 for col, (icon, label, value) in zip(cols, card_data):
     col.markdown(f"""
@@ -445,7 +486,9 @@ for col, (icon, label, value) in zip(cols, card_data):
         <div class="metric-value">{value}</div>
     </div>
     """, unsafe_allow_html=True)
+
 st.markdown("<br>", unsafe_allow_html=True)
+
 # ── Predict Button ──
 if st.button("🔮  Predict Grid Load", use_container_width=True):
     # 1. Build raw feature dict
@@ -459,14 +502,18 @@ if st.button("🔮  Predict Grid Load", use_container_width=True):
         "lag_2_power":   lag_2,
         "rolling_mean_3": rolling_mean,
     }
+    
     # 2. Create DataFrame and enforce the exact training column order
     input_df = pd.DataFrame({k: [v] for k, v in raw_features.items()})
     input_df = input_df[FEATURE_ORDER]
+    
     try:
         # 3. Run prediction
         prediction: float = float(model.predict(input_df)[0])
+        
         # 4. Classify demand level
         demand_label, demand_class, demand_emoji = classify_load(prediction)
+        
         # ── Result card ──
         st.markdown(f"""
         <div class="glass-card result-box">
@@ -480,9 +527,12 @@ if st.button("🔮  Predict Grid Load", use_container_width=True):
             </div>
         </div>
         """, unsafe_allow_html=True)
+        
         st.markdown("<br>", unsafe_allow_html=True)
+        
         # ── Visual analytics row ──
         g_col, r_col = st.columns(2, gap="medium")
+        
         with g_col:
             st.markdown("""
             <div class="glass-card" style="padding:16px 12px 8px;">
@@ -495,6 +545,7 @@ if st.button("🔮  Predict Grid Load", use_container_width=True):
             """, unsafe_allow_html=True)
             st.plotly_chart(build_gauge(prediction),
                            use_container_width=True, config={"displayModeBar": False})
+                           
         with r_col:
             st.markdown("""
             <div class="glass-card" style="padding:16px 12px 8px;">
@@ -507,6 +558,7 @@ if st.button("🔮  Predict Grid Load", use_container_width=True):
             """, unsafe_allow_html=True)
             st.plotly_chart(build_feature_radar(raw_features),
                            use_container_width=True, config={"displayModeBar": False})
+                           
         # ── Feature bar chart ──
         st.markdown("""
         <div class="glass-card" style="padding:16px 20px 8px; margin-top:8px;">
@@ -519,6 +571,7 @@ if st.button("🔮  Predict Grid Load", use_container_width=True):
         """, unsafe_allow_html=True)
         st.plotly_chart(build_feature_bar(raw_features),
                        use_container_width=True, config={"displayModeBar": False})
+                       
         # ── Actionable insight ──
         if prediction < 1.5:
             insight = ("💡 **Low demand detected.** "
@@ -532,6 +585,7 @@ if st.button("🔮  Predict Grid Load", use_container_width=True):
             insight = ("🚨 **High demand alert!** "
                        "Consider activating peaking plants or demand‑response "
                        "programs to avoid blackouts.")
+                       
         st.markdown(f"""
         <div class="glass-card" style="margin-top:16px; padding:20px 24px;
              border-left: 3px solid var(--accent-cyan);">
@@ -544,8 +598,10 @@ if st.button("🔮  Predict Grid Load", use_container_width=True):
             </p>
         </div>
         """, unsafe_allow_html=True)
+        
     except Exception as exc:
         st.error(f"**Prediction Error:** {exc}")
+
 # ── Footer ──
 st.markdown("""
 <div class="neon-divider"></div>
