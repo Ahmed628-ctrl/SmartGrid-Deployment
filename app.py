@@ -838,6 +838,6 @@ if predict_btn:
 st.markdown(f"""
 <div class="footer">
     <p>Powered by XGBoost Machine Learning | Streamlit Web Framework</p>
-    <p>© 2024 Smart Grid Predictor | Real-time Power Consumption Analytics</p>
+    <p>© 2026 Smart Grid Predictor | Real-time Power Consumption Analytics</p>
 </div>
 """, unsafe_allow_html=True)
